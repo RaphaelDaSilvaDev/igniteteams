@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AppError } from "../../utils/AppError";
-import { GROUP_COLLECTION } from "../storageConfig";
 import { groupsGetAll } from "./groupGetAllGroups";
+
+import { GROUP_COLLECTION } from "../storageConfig";
+import { AppError } from "../../utils/AppError";
 
 export async function groupCreate(groupName: string) {
   try {

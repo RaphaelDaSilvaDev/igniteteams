@@ -1,4 +1,3 @@
-import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacityProps } from "react-native";
 import { Container, Icon, Title } from "./styles";
 

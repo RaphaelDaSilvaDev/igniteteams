@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { GROUP_COLLECTION, PLAYER_COLLECTION } from "../storageConfig";
 import { groupsGetAll } from "./groupGetAllGroups";
+
+import { GROUP_COLLECTION, PLAYER_COLLECTION } from "../storageConfig";
 
 export async function groupRemoveByName(groupName: string) {
   try {
