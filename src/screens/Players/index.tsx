@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Alert, FlatList } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Alert, FlatList, TextInput } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
 import { Button } from "../../components/Button";
@@ -11,19 +11,25 @@ import { Input } from "../../components/Input";
 import { ListEmpty } from "../../components/ListEmpty";
 import { PlayerCard } from "../../components/PlayerCard";
 
-import { Container, Form, HeaderList, NumbersOfPlayers } from "./styles";
-import { AppError } from "../../utils/AppError";
 import { playerCreateByGroup } from "../../storage/player/playerCreateByGroup";
-import { playerGetByGroup } from "../../storage/player/playerGetByGroup";
+import { playerGetByGroupAndTeam } from "../../storage/player/playerGetByGroupAndTeam";
+import { PlayerDTO } from "../../storage/player/types";
+
+import { AppError } from "../../utils/AppError";
+import { Container, Form, HeaderList, NumbersOfPlayers } from "./styles";
 
 type RouteParams = {
   group: string;
 };
 
 export function Players() {
+  const newPlayerInputRef = useRef<TextInput>(null);
   const [playerName, setPlayerName] = useState("");
   const [team, setTeam] = useState("Time A");
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState<PlayerDTO[]>([]);
+
+  const route = useRoute();
+  const { group } = route.params as RouteParams;
 
   async function handleAddPlayer() {
     if (playerName.trim().length === 0) {
@@ -37,6 +43,10 @@ export function Players() {
 
     try {
       await playerCreateByGroup(newPlayer, group);
+
+      newPlayerInputRef.current?.blur();
+      fetchPlayersByTeam();
+      setPlayerName("");
     } catch (error) {
       if (error instanceof AppError) {
         Alert.alert("Novo player", error.message);
@@ -47,8 +57,20 @@ export function Players() {
     }
   }
 
-  const route = useRoute();
-  const { group } = route.params as RouteParams;
+  async function fetchPlayersByTeam() {
+    try {
+      const players = await playerGetByGroupAndTeam(group, team);
+      setPlayers(players);
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Players", "Não foi possível carregar os Players");
+    }
+  }
+
+  useEffect(() => {
+    fetchPlayersByTeam();
+  }, [team]);
+
   return (
     <Container>
       <Header showBackButton />
@@ -56,7 +78,15 @@ export function Players() {
       <HightLight title={group} subtitle="adicione a galera e separe os times" />
 
       <Form>
-        <Input placeholder="Nome da pessoa" autoCorrect={false} onChangeText={setPlayerName} />
+        <Input
+          inputRef={newPlayerInputRef}
+          placeholder="Nome da pessoa"
+          autoCorrect={false}
+          value={playerName}
+          onChangeText={setPlayerName}
+          onSubmitEditing={handleAddPlayer}
+          returnKeyType="done"
+        />
         <ButtonIcon icon="add" onPress={handleAddPlayer} />
       </Form>
 
@@ -74,8 +104,8 @@ export function Players() {
 
       <FlatList
         data={players}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => <PlayerCard name={item} onRemove={() => {}} />}
+        keyExtractor={(item) => item.name}
+        renderItem={({ item }) => <PlayerCard name={item.name} onRemove={() => {}} />}
         ListEmptyComponent={() => <ListEmpty message="Não há pessoas nesse time" />}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={players.length === 0 && { flex: 1 }}
