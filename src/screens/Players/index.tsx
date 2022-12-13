@@ -3,17 +3,18 @@ import { Alert, FlatList, TextInput } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
 import { Button } from "../../components/Button";
-import { ButtonIcon } from "../../components/ButtonIcon";
 import { Filter } from "../../components/Filter";
 import { Header } from "../../components/Header";
-import { HightLight } from "../../components/HightLight";
 import { Input } from "../../components/Input";
 import { ListEmpty } from "../../components/ListEmpty";
+import { ButtonIcon } from "../../components/ButtonIcon";
+import { HightLight } from "../../components/HightLight";
 import { PlayerCard } from "../../components/PlayerCard";
 
-import { playerCreateByGroup } from "../../storage/player/playerCreateByGroup";
-import { playerGetByGroupAndTeam } from "../../storage/player/playerGetByGroupAndTeam";
 import { PlayerDTO } from "../../storage/player/types";
+import { playerCreateByGroup } from "../../storage/player/playerCreateByGroup";
+import { playerRemoveByGroup } from "../../storage/player/playerRemoveByGroup";
+import { playerGetByGroupAndTeam } from "../../storage/player/playerGetByGroupAndTeam";
 
 import { AppError } from "../../utils/AppError";
 import { Container, Form, HeaderList, NumbersOfPlayers } from "./styles";
@@ -54,6 +55,16 @@ export function Players() {
         Alert.alert("Novo player", "Não foi possível adicionar o player!");
         console.log(error);
       }
+    }
+  }
+
+  async function handleRemovePlayer(playerName: string) {
+    try {
+      await playerRemoveByGroup(playerName, group);
+      fetchPlayersByTeam();
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Player", "Não foi possível remover o player!");
     }
   }
 
@@ -105,7 +116,9 @@ export function Players() {
       <FlatList
         data={players}
         keyExtractor={(item) => item.name}
-        renderItem={({ item }) => <PlayerCard name={item.name} onRemove={() => {}} />}
+        renderItem={({ item }) => (
+          <PlayerCard name={item.name} onRemove={() => handleRemovePlayer(item.name)} />
+        )}
         ListEmptyComponent={() => <ListEmpty message="Não há pessoas nesse time" />}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={players.length === 0 && { flex: 1 }}
