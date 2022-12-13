@@ -5,14 +5,17 @@ export type ButtonTypeStyleProps = "PRIMARY" | "SECONDARY";
 
 type Props = {
   type: ButtonTypeStyleProps;
+  disabled?: boolean;
 };
 
 export const Container = styled(TouchableOpacity)<Props>`
   flex: 1;
   min-height: 56px;
   max-height: 56px;
-  background-color: ${({ theme, type }) =>
+  background-color: ${({ theme, type, disabled }) =>
     type === "PRIMARY" ? theme.COLORS.GREEN_700 : theme.COLORS.RED_700};
+
+  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
 
   border-radius: 6px;
   justify-content: center;

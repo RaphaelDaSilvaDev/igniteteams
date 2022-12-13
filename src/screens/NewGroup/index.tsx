@@ -8,6 +8,8 @@ import { Input } from "../../components/Input";
 
 import { Container, Content, Icon } from "./styles";
 import { groupCreate } from "../../storage/group/groupCreate";
+import { AppError } from "../../utils/AppError";
+import { Alert } from "react-native";
 
 export function NewGroup() {
   const navigate = useNavigation();
@@ -18,7 +20,12 @@ export function NewGroup() {
       await groupCreate(group);
       navigate.navigate("players", { group });
     } catch (error) {
-      console.log(error);
+      if (error instanceof AppError) {
+        Alert.alert("Novo Grupo", error.message);
+      } else {
+        Alert.alert("Novo Grupo", "Não foi possível criar um novo grupo!");
+        console.log(error);
+      }
     }
   }
 
@@ -36,7 +43,7 @@ export function NewGroup() {
           title="Criar"
           style={{ marginTop: 20 }}
           onPress={handleCreateNewGroup}
-          disabled={group === ""}
+          disabled={group.trim().length === 0}
         />
       </Content>
     </Container>
